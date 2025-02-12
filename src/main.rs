@@ -10,7 +10,7 @@ mod player;
 use player::Player;
 
 fn round_to_two_decimal_places(value: f32) -> f32 {
-    (value * 100.0).round() / 100.0
+    (value / 10.0).round() *10.0
 }
 fn main(){
  
@@ -30,7 +30,6 @@ struct vertex{
                 }
 implement_vertex!(vertex,position);
 
-let mut border : f32 = 300.0;
 let mut _window_size : (u32,u32) = (400,400);
 
 let mut mouse_x = 0f32;
@@ -103,18 +102,20 @@ let _ = event_loop.run(move | event , window_target |  {
                 target_y = round_to_two_decimal_places(target_y);
                 x = round_to_two_decimal_places(x);
                 y = round_to_two_decimal_places(y);
-                if (can_move)
+
+                // dbg!(x,y);
+                if can_move
                 {
-                    if (x as f32 != target_x as f32 || y as f32 != target_y as f32 ){
-                        if (x-target_x < 0 as f32){x += 0.01;}
-                        if (x-target_x > 0 as f32){x -= 0.01;}
-                        if (y-target_y < 0 as f32){y += 0.01;}
-                        if (y-target_y > 0 as f32){y -= 0.01;}
+                    if x-target_x != 0 as f32  || y-target_y != 0 as f32 {
+                        if x-target_x < 0 as f32 {x += 10.0;}
+                        if x-target_x > 0 as f32 {x -= 10.0;}
+                        if y-target_y < 0 as f32 {y += 10.0;}
+                        if y-target_y > 0 as f32 {y -= 10.0;}
                     }
-                    if(x == target_x && y == target_y){can_move =false;}    
+                    else {can_move =false;}    
                 }
-                qx = (_window_size.0 as f32 / 2.0 ) ;
-                qy = (_window_size.1 as f32 / 2.0 ) ;
+                qx = _window_size.0 as f32 / 2.0  ;
+                qy = _window_size.1 as f32 / 2.0  ;
 
 
                 let mut target = _display.draw();
@@ -123,18 +124,18 @@ let _ = event_loop.run(move | event , window_target |  {
 
                 target.draw(&vertex_buffer2, &indices2, &program2, &uniform! {
                         matrix: [
-                        [(1.0 / qx), 0.0, 0.0, 0.0],
-                        [0.0, (1.0 / qy), 0.0, 0.0],
+                        [(1.0 / qx*2.0), 0.0, 0.0, 0.0],
+                        [0.0, (1.0 / qy*2.0), 0.0, 0.0],
                         [0.0, 0.0, 1.0, 0.0],
                         [ 0.0  , 0.0 , 0.0, 1.0f32],
                         ] }, &Default::default()).unwrap();
 
                 target.draw(&vertex_buffer, &indices, &program, &uniform! {
                     matrix: [
-                    [(1.0 / qx), 0.0, 0.0, 0.0],
-                    [0.0, (1.0 / qy), 0.0, 0.0],
+                    [(1.0 / qx*2.0), 0.0, 0.0, 0.0],
+                    [0.0, (1.0 / qy*2.0), 0.0, 0.0],
                     [0.0, 0.0, 1.0, 0.0],
-                    [ x , y , 0.0, 1.0f32],
+                    [ (x)/ qx , (y) / qy , 0.0, 1.0f32],
                     ] , tex: &texture}, &Default::default()).unwrap();
                 
                 target.finish().unwrap();
@@ -143,15 +144,16 @@ let _ = event_loop.run(move | event , window_target |  {
             glium::winit::event::WindowEvent::MouseInput { button, state, .. } => {
                 if button == MouseButton::Left && state == ElementState::Pressed {
                     can_move =true;
-                    target_x = mouse_x;
-                    target_y = mouse_y ;
+                    target_x = mouse_x - qx;
+                    target_y = mouse_y + qy ;
+
                 }
             },
             glium::winit::event::WindowEvent::CursorMoved { position, .. } => {
                 // if (!can_move) {
                     
-                    mouse_x = (position.x as f32 / qx) - 1.0;
-                    mouse_y = -(position.y as f32 / qy) + 1.0;
+                    mouse_x = (position.x as f32 ) ;
+                    mouse_y = -(position.y as f32 );
                 // }
 
             },
