@@ -1,7 +1,7 @@
 use glium::winit::event::{ElementState, Event, KeyEvent, MouseButton, WindowEvent};
 use glium::winit::keyboard::Key;
 use glium::winit::{self, event, keyboard};
-use glium::{self, implement_vertex, uniform, VertexBuffer};
+use glium::{self, implement_vertex, uniform, Blend, VertexBuffer};
 use glium::{glutin::api::egl::display, winit::{dpi::Size, event_loop, window}, Surface};
 
 
@@ -10,7 +10,7 @@ mod player;
 use player::Player;
 
 fn round_to_two_decimal_places(value: f32) -> f32 {
-    (value / 10.0).round() *10.0
+    (value).round()
 }
 fn main(){
  
@@ -105,15 +105,16 @@ let _ = event_loop.run(move | event , window_target |  {
                 y = round_to_two_decimal_places(y);
 
                 // dbg!(x,y);
+                let step_size = 2f32;
                 if can_move
                 {
-                    if x-target_x != 0 as f32  || y-target_y != 0 as f32 {
-                        if x-target_x < 0 as f32 {x += 10.0;}
-                        if x-target_x > 0 as f32 {x -= 10.0;}
-                        if y-target_y < 0 as f32 {y += 10.0;}
-                        if y-target_y > 0 as f32 {y -= 10.0;}
-                    }
-                    else {can_move =false;}    
+                    if (-step_size < x-target_x && x-target_x < step_size) && (-step_size < y-target_y && y-target_y < step_size) {can_move =false;}
+                    else {
+                        if x-target_x < 0f32 {x += step_size;}
+                        if x-target_x > 0f32 {x -= step_size;}
+                        if y-target_y < 0f32 {y += step_size;}
+                        if y-target_y > 0f32 {y -= step_size;}
+                    }  
                 }
                 qx = _window_size.0 as f32 / 2.0  ;
                 qy = _window_size.1 as f32 / 2.0  ;
@@ -137,7 +138,10 @@ let _ = event_loop.run(move | event , window_target |  {
                     [0.0, (1.0 / qy*2.0), 0.0, 0.0],
                     [0.0, 0.0, 1.0, 0.0],
                     [ (x)/ qx , (y) / qy , 0.0, 1.0f32],
-                    ] , tex: &texture}, &Default::default()).unwrap();
+                    ] , tex: &texture}, &glium::DrawParameters {
+                        blend: Blend::alpha_blending(), // فعال کردن ترکیب رنگ‌ها
+                        ..Default::default()
+                    }).unwrap();
                 
                 target.finish().unwrap();
                 

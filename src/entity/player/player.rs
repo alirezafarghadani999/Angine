@@ -49,10 +49,10 @@ impl Player {
                 color = texture(tex, v_texture_cordinate);
             }
         "#;
-        
 
-        let image = image::load(std::io::Cursor::new(&include_bytes!("../.././image/download.jpg")),
-                                                        image::ImageFormat::Jpeg).unwrap().to_rgba8();
+
+        let image = image::load(std::io::Cursor::new(&include_bytes!("./character.png")),
+                                                        image::ImageFormat::Png).unwrap().to_rgba8();
 
         let image_dimantions = image.dimensions();
         let image = glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimantions);
