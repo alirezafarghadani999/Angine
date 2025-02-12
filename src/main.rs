@@ -30,6 +30,7 @@ struct vertex{
                 }
 implement_vertex!(vertex,position);
 
+let mut border : f32 = 300.0;
 let mut _window_size : (u32,u32) = (400,400);
 
 let mut mouse_x = 0f32;
