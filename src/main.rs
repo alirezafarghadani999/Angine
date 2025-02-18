@@ -46,6 +46,7 @@ let mut qx:f32 = 0.0;
 let mut qy:f32 = 0.0;
 
 let mut can_move = false;
+let step_size = 2f32;
 
 let _ = event_loop.run(move | event , window_target |  {
     match event {
@@ -63,49 +64,42 @@ let _ = event_loop.run(move | event , window_target |  {
 
 
 
-                let vertex_shader_src2 = r#"
-                    #version 140
+                // let vertex_shader_src2 = r#"
+                //     #version 140
 
-                    in vec2 position;
-                    uniform mat4 matrix;
+                //     in vec2 position;
+                //     uniform mat4 matrix;
 
-                    void main() {
-                        gl_Position = matrix * vec4(position, 0.0, 1.0);
-                    }
-                "#;
+                //     void main() {
+                //         gl_Position = matrix * vec4(position, 0.0, 1.0);
+                //     }
+                // "#;
 
-                let fragment_shader_src2 = r#"
-                    #version 140
+                // let fragment_shader_src2 = r#"
+                //     #version 140
 
-                    out vec4 color;
-                    uniform sampler2D tex;
+                //     out vec4 color;
+                //     uniform sampler2D tex;
 
-                    void main() {
-                        color = vec4(0.0, 0.0 ,0.0, 1.0);
-                    }
-                "#;
+                //     void main() {
+                //         color = vec4(0.0, 0.0 ,0.0, 1.0);
+                //     }
+                // "#;
                 
-                let shape2 = vec![
-                    vertex { position: [border ,border ] },
-                    vertex { position: [-border,border ] },
-                    vertex { position: [-border,-border ] },
-                    vertex { position: [border,-border ] },
+                // let shape2 = vec![
+                //     vertex { position: [border ,border ] },
+                //     vertex { position: [-border,border ] },
+                //     vertex { position: [-border,-border ] },
+                //     vertex { position: [border,-border ] },
 
-                ];
+                // ];
 
-                let vertex_buffer2: VertexBuffer<vertex> = glium::VertexBuffer::new(&_display, &shape2).unwrap();
-                let indices2 = glium::index::NoIndices(glium::index::PrimitiveType::TriangleFan);
+                // let vertex_buffer2: VertexBuffer<vertex> = glium::VertexBuffer::new(&_display, &shape2).unwrap();
+                // let indices2 = glium::index::NoIndices(glium::index::PrimitiveType::TriangleFan);
 
-                let program2 = glium::Program::from_source(&_display, &vertex_shader_src2, &fragment_shader_src2, None).unwrap();
-
-
-                target_x = round_to_two_decimal_places(target_x);
-                target_y = round_to_two_decimal_places(target_y);
-                x = round_to_two_decimal_places(x);
-                y = round_to_two_decimal_places(y);
+                // let program2 = glium::Program::from_source(&_display, &vertex_shader_src2, &fragment_shader_src2, None).unwrap();
 
                 // dbg!(x,y);
-                let step_size = 2f32;
                 if can_move
                 {
                     if (-step_size < x-target_x && x-target_x < step_size) && (-step_size < y-target_y && y-target_y < step_size) {can_move =false;}
@@ -124,13 +118,13 @@ let _ = event_loop.run(move | event , window_target |  {
 
                 target.clear_color(0.47, 0.26, 0.17, 1.0);
 
-                target.draw(&vertex_buffer2, &indices2, &program2, &uniform! {
-                        matrix: [
-                        [(1.0 / qx*2.0), 0.0, 0.0, 0.0],
-                        [0.0, (1.0 / qy*2.0), 0.0, 0.0],
-                        [0.0, 0.0, 1.0, 0.0],
-                        [ 0.0  , 0.0 , 0.0, 1.0f32],
-                        ] }, &Default::default()).unwrap();
+                // target.draw(&vertex_buffer2, &indices2, &program2, &uniform! {
+                //         matrix: [
+                //         [(1.0 / qx*2.0), 0.0, 0.0, 0.0],
+                //         [0.0, (1.0 / qy*2.0), 0.0, 0.0],
+                //         [0.0, 0.0, 1.0, 0.0],
+                //         [ 0.0  , 0.0 , 0.0, 1.0f32],
+                //         ] }, &Default::default()).unwrap();
 
                 target.draw(&vertex_buffer, &indices, &program, &uniform! {
                     matrix: [
@@ -149,8 +143,8 @@ let _ = event_loop.run(move | event , window_target |  {
             glium::winit::event::WindowEvent::MouseInput { button, state, .. } => {
                 if button == MouseButton::Left && state == ElementState::Pressed {
                     can_move =true;
-                    target_x = mouse_x - qx;
-                    target_y = mouse_y + qy ;
+                    target_x = round_to_two_decimal_places(mouse_x - qx);
+                    target_y = round_to_two_decimal_places(mouse_y + qy);
 
                 }
             },
