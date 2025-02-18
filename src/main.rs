@@ -12,8 +12,19 @@ use player::Player;
 fn round_to_two_decimal_places(value: f32) -> f32 {
     (value).round()
 }
+
 fn main(){
  
+let map = vec![
+
+    // [0f32,-45f32,200f32,0f32],
+    // [11f32,45f32,-40f32,6f32],
+    // [0f32,-45f32,200f32,8f32],
+    // [67f32,23f32,-440f32,99f32],
+    [-420f32,-80f32,45f32]
+
+    ];
+
 let event_loop = glium::winit::event_loop::EventLoopBuilder::new().build().unwrap();
 let (_window , _display ) = glium::backend::glutin::SimpleWindowBuilder::new()
 .with_title("test")
@@ -30,7 +41,7 @@ struct vertex{
                 }
 implement_vertex!(vertex,position);
 
-let mut border : f32 = 300.0;
+let mut border : f32 = 30.0;
 let mut _window_size : (u32,u32) = (400,400);
 
 let mut mouse_x = 0f32;
@@ -64,42 +75,42 @@ let _ = event_loop.run(move | event , window_target |  {
 
 
 
-                // let vertex_shader_src2 = r#"
-                //     #version 140
+                 let vertex_shader_src2 = r#"
+                     #version 140
 
-                //     in vec2 position;
-                //     uniform mat4 matrix;
+                     in vec2 position;
+                     uniform mat4 matrix;
 
-                //     void main() {
-                //         gl_Position = matrix * vec4(position, 0.0, 1.0);
-                //     }
-                // "#;
+                     void main() {
+                         gl_Position = matrix * vec4(position, 0.0, 1.0);
+                     }
+                 "#;
 
-                // let fragment_shader_src2 = r#"
-                //     #version 140
+                 let fragment_shader_src2 = r#"
+                     #version 140
 
-                //     out vec4 color;
-                //     uniform sampler2D tex;
+                     out vec4 color;
+                     uniform sampler2D tex;
+                     uniform float c;
 
-                //     void main() {
-                //         color = vec4(0.0, 0.0 ,0.0, 1.0);
-                //     }
-                // "#;
+                     void main() {
+                         color = vec4(c, 0.0 ,0.0, 1.0);
+                     }
+                 "#;
                 
-                // let shape2 = vec![
-                //     vertex { position: [border ,border ] },
-                //     vertex { position: [-border,border ] },
-                //     vertex { position: [-border,-border ] },
-                //     vertex { position: [border,-border ] },
+                 let shape2 = vec![
+                     vertex { position: [border ,border ] },
+                     vertex { position: [-border,border ] },
+                     vertex { position: [-border,-border ] },
+                     vertex { position: [border,-border ] },
 
-                // ];
+                 ];
 
-                // let vertex_buffer2: VertexBuffer<vertex> = glium::VertexBuffer::new(&_display, &shape2).unwrap();
-                // let indices2 = glium::index::NoIndices(glium::index::PrimitiveType::TriangleFan);
+                 let vertex_buffer2: VertexBuffer<vertex> = glium::VertexBuffer::new(&_display, &shape2).unwrap();
+                 let indices2 = glium::index::NoIndices(glium::index::PrimitiveType::TriangleFan);
 
-                // let program2 = glium::Program::from_source(&_display, &vertex_shader_src2, &fragment_shader_src2, None).unwrap();
+                 let program2 = glium::Program::from_source(&_display, &vertex_shader_src2, &fragment_shader_src2, None).unwrap();
 
-                // dbg!(x,y);
                 if can_move
                 {
                     if (-step_size < x-target_x && x-target_x < step_size) && (-step_size < y-target_y && y-target_y < step_size) {can_move =false;}
@@ -118,13 +129,18 @@ let _ = event_loop.run(move | event , window_target |  {
 
                 target.clear_color(0.47, 0.26, 0.17, 1.0);
 
-                // target.draw(&vertex_buffer2, &indices2, &program2, &uniform! {
-                //         matrix: [
-                //         [(1.0 / qx*2.0), 0.0, 0.0, 0.0],
-                //         [0.0, (1.0 / qy*2.0), 0.0, 0.0],
-                //         [0.0, 0.0, 1.0, 0.0],
-                //         [ 0.0  , 0.0 , 0.0, 1.0f32],
-                //         ] }, &Default::default()).unwrap();
+                for (keyi,i) in map.iter().enumerate() {
+                    for (keyj,j) in i.iter().enumerate() {
+                         target.draw(&vertex_buffer2, &indices2, &program2, &uniform! {
+                                 matrix: [
+                                 [(1.0 / qx*2.0), 0.0, 0.0, 0.0],
+                                 [0.0, (1.0 / qy*2.0), 0.0, 0.0],
+                                 [0.0, 0.0, 1.0, 0.0],
+                                 [ ((keyi as f32 )+(keyj as f32 ))*50.0 / qx , *j / qy , 0.0, 1.0f32],
+                                 ] ,
+                         c:(*j/500f32).abs()}, &Default::default()).unwrap();
+                    }
+                }
 
                 target.draw(&vertex_buffer, &indices, &program, &uniform! {
                     matrix: [
@@ -133,7 +149,7 @@ let _ = event_loop.run(move | event , window_target |  {
                     [0.0, 0.0, 1.0, 0.0],
                     [ (x)/ qx , (y) / qy , 0.0, 1.0f32],
                     ] , tex: &texture}, &glium::DrawParameters {
-                        blend: Blend::alpha_blending(), // فعال کردن ترکیب رنگ‌ها
+                        blend: Blend::alpha_blending(), 
                         ..Default::default()
                     }).unwrap();
                 
