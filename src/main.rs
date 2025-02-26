@@ -38,7 +38,7 @@ fn round_to_two_decimal_places(value: f32) -> f32 {
 
 fn main(){
  
-let map = vec![
+let mut map = vec![
 
     // [0f32,-45f32,200f32,0f32],
     // [11f32,45f32,-40f32,6f32],
@@ -48,6 +48,8 @@ let map = vec![
 
     ];
 
+let mut map_bk : Vec<[f32;3]> = map.clone();
+let mut hide = false;
 let (event_loop, _window, _display) = create_window();
 
 
@@ -170,7 +172,15 @@ let _ = event_loop.run(move | event , window_target |  {
 
 
                 let ui = imgui_context.frame();
-                ui.show_demo_window(&mut true);
+                ui.text("Test1");
+                ui.checkbox("hide",&mut hide);
+                if(hide == true){
+                    map.clear();
+                }else{
+                    map = map_bk.clone();
+                }
+                ui.begin_menu("maryam");
+                ui.button_with_size("maryam", [100f32,50f32]);
 
                 let mut target = _display.draw();
 
