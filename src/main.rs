@@ -1,4 +1,6 @@
 
+use std::env;
+
 use glium::winit::event::{ElementState, Event, KeyEvent, MouseButton, WindowEvent};
 use glium::winit::keyboard::Key;
 use glium::winit::{self, event, keyboard};
@@ -18,23 +20,21 @@ use player::Player;
 mod WindowHandler;
 
 
+#[path="core/EnvirementLogic.rs"]
+mod EnvirementLogic;
+
+
 fn round_to_two_decimal_places(value: f32) -> f32 {
     (value).round()
 }
 
 fn main(){
- 
-let mut map = vec![
 
-    // [0f32,-45f32,200f32,0f32],
-    // [11f32,45f32,-40f32,6f32],
-    // [0f32,-45f32,200f32,8f32],
-    // [67f32,23f32,-440f32,99f32],
-    [-420f32,-80f32,45f32]
+let env = EnvirementLogic::EnvirementLogic::create(20,0,5f32);
 
-    ];
+let mut map= env.get_env(); 
+let mut map_bk = map.clone();
 
-let mut map_bk : Vec<[f32;3]> = map.clone();
 let mut hide = false;
 
 let winhan = WindowHandler::WindowHandler::init( "test");
@@ -61,7 +61,6 @@ struct vertex{
                 }
 implement_vertex!(vertex,position);
 
-let mut border : f32 = 30.0;
 let mut _window_size : (u32,u32) = (400,400);
 
 let mut mouse_x = 0f32;
@@ -77,6 +76,7 @@ let mut qx:f32 = 0.0;
 let mut qy:f32 = 0.0;
 
 let mut can_move = false;
+let mut in_ui = false;
 let step_size = 2f32;
 
 // event loop
@@ -122,15 +122,15 @@ let _ = event_loop.run(move | event , window_target |  {
                      uniform float c;
 
                      void main() {
-                         color = vec4(c, 0.0 ,0.0, 1.0);
+                         color = vec4(c, c ,c, 1.0);
                      }
                  "#;
                 
                  let shape2 = vec![
-                     vertex { position: [border ,border ] },
-                     vertex { position: [-border,border ] },
-                     vertex { position: [-border,-border ] },
-                     vertex { position: [border,-border ] },
+                     vertex { position: [env.get_tileSize() ,env.get_tileSize() ] },
+                     vertex { position: [-env.get_tileSize(),env.get_tileSize() ] },
+                     vertex { position: [-env.get_tileSize(),-env.get_tileSize() ] },
+                     vertex { position: [env.get_tileSize(),-env.get_tileSize() ] },
 
                  ];
 
@@ -154,20 +154,14 @@ let _ = event_loop.run(move | event , window_target |  {
 
 
                 let ui = imgui_context.frame();
+                in_ui = ui.is_window_focused() || ui.is_any_item_focused() || ui.is_item_hovered() ;
+
                 ui.text("Test1");
-                ui.checkbox("hide",&mut hide);
-                if(hide == true){
-                    map.clear();
-                }else{
-                    map = map_bk.clone();
-                }
-                ui.begin_menu("maryam");
-                ui.button_with_size("maryam", [100f32,50f32]);
+                ui.button_with_size("Alireza test btn", [100f32,50f32]);
 
                 let mut target = _display.draw();
 
-                target.clear_color(0.47, 0.26, 0.17, 1.0);
-
+                target.clear_color(0f32,0f32,0f32, 1.0);
 
 
                 for (keyi,i) in map.iter().enumerate() {
@@ -177,9 +171,13 @@ let _ = event_loop.run(move | event , window_target |  {
                                  [(1.0 / qx*2.0), 0.0, 0.0, 0.0],
                                  [0.0, (1.0 / qy*2.0), 0.0, 0.0],
                                  [0.0, 0.0, 1.0, 0.0],
-                                 [ ((keyi as f32 )+(keyj as f32 ))*50.0 / qx , *j / qy , 0.0, 1.0f32],
+                                 [ (keyi as i32 - env.get_mapSize() as i32 /2 )
+                                                         as f32 *env.get_tileSize() / qx*4.0 
+                                , ( keyj as i32 - env.get_mapSize() as i32 /2)
+                                                         as f32 *env.get_tileSize() / qy*4.0
+                                , 0.0, 1.0f32],
                                  ] ,
-                         c:(*j/500f32).abs()}, &Default::default()).unwrap();
+                         c:(*j).abs()}, &Default::default()).unwrap();
                     }
                 }
 
@@ -206,19 +204,17 @@ let _ = event_loop.run(move | event , window_target |  {
             },
             glium::winit::event::WindowEvent::MouseInput { button, state, .. } => {
                 if button == MouseButton::Left && state == ElementState::Pressed {
-                    can_move =true;
-                    target_x = round_to_two_decimal_places(mouse_x - qx);
-                    target_y = round_to_two_decimal_places(mouse_y + qy);
+                    if !in_ui{ 
+                        can_move =true;
+                        target_x = round_to_two_decimal_places(mouse_x - qx);
+                        target_y = round_to_two_decimal_places(mouse_y + qy);
+                    }
 
                 }
             },
             glium::winit::event::WindowEvent::CursorMoved { position, .. } => {
-                // if (!can_move) {
-                    
                     mouse_x = (position.x as f32 ) ;
                     mouse_y = -(position.y as f32 );
-                // }
-
             },
             _ => (),
         },
