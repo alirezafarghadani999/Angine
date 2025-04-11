@@ -31,12 +31,18 @@ impl EnvironmentLogic {
 
         self.map_box = std::array::from_fn(|_| {
             std::array::from_fn(|_| {
-                (rng.random_range(-1.0..1.0) as f32 * MAP_SIZE as f32).round() / MAP_SIZE as f32
+                (rng.random_range(0.1..1.0) as f32 * 100 as f32).round() / 100 as f32
             })
         });
-        //generate cordinate that have radio active noise
 
-        //genetare cordinate that have good ground for
+        for (rows_key, rows) in self.map_box.iter_mut().enumerate() 
+        {
+            for (columns_key, column) in rows.iter_mut().enumerate()
+            {
+                dbg!(columns_key, column);
+            }
+        }
+
     }
 
     pub fn get_env(&self) -> [[f32; MAP_SIZE]; MAP_SIZE] {
