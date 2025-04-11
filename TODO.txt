@@ -1,5 +1,5 @@
-1. Create invirement logic
+1. Create environment logic
 2. Create items {
 
 }
-3. improve main charcter : movement , animation
+3. improve main character : movement , animation
