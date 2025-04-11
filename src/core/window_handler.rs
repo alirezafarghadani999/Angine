@@ -1,6 +1,5 @@
 use std::num::NonZeroU32;
 
-use glium::glutin;
 use glium::glutin::config::ConfigTemplateBuilder;
 use glium::glutin::context::ContextAttributesBuilder;
 use glium::glutin::display::GetGlDisplay;

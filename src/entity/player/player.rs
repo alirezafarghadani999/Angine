@@ -3,11 +3,10 @@ use glium::{
     glutin::surface::WindowSurface,
     implement_vertex,
     index::NoIndices,
-    vertex::{self, VertexBufferAny},
-    Display, Program, Texture2d, Vertex, VertexBuffer,
+    vertex::VertexBufferAny,
+    Display, Program, Texture2d, VertexBuffer,
 };
 
-struct Player_Data {}
 pub(crate) struct Player {
     _display: Display<WindowSurface>,
 }
@@ -21,11 +20,11 @@ impl Player {
 
     pub fn load_entity(&mut self) -> (VertexBufferAny, NoIndices, Program, Texture2d) {
         #[derive(Clone, Copy)]
-        struct vertex {
+        struct Vertex {
             position: [f32; 2],
             texture_cordinate: [f32; 2],
         }
-        implement_vertex!(vertex, position, texture_cordinate);
+        implement_vertex!(Vertex, position, texture_cordinate);
 
         let vertex_shader_src = r#"
             #version 140
@@ -66,25 +65,25 @@ impl Player {
         let texture = glium::texture::Texture2d::new(&self._display, image).unwrap();
 
         let shape = vec![
-            vertex {
+            Vertex {
                 position: [10.0, 10.0],
                 texture_cordinate: [1.0, 1.0],
             },
-            vertex {
+            Vertex {
                 position: [-10.0, 10.0],
                 texture_cordinate: [0.0, 1.0],
             },
-            vertex {
+            Vertex {
                 position: [-10.0, -10.0],
                 texture_cordinate: [0.0, 0.0],
             },
-            vertex {
+            Vertex {
                 position: [10.0, -10.0],
                 texture_cordinate: [1.0, 0.0],
             },
         ];
 
-        let vertex_buffer: VertexBuffer<vertex> =
+        let vertex_buffer: VertexBuffer<Vertex> =
             glium::VertexBuffer::new(&self._display, &shape).unwrap();
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TriangleFan);
 

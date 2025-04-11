@@ -1,42 +1,29 @@
-use std::env;
 
-use glium::winit::event::{ElementState, Event, KeyEvent, MouseButton, WindowEvent};
-use glium::winit::keyboard::Key;
-use glium::winit::{self, event, keyboard};
-use glium::{self, glutin, implement_vertex, uniform, Blend, VertexBuffer};
-use glium::{
-    glutin::api::egl::display,
-    winit::{dpi::Size, event_loop, window},
-    Surface,
-};
+use glium::winit::event::{ElementState, MouseButton};
+use glium::{self, implement_vertex, uniform, Blend, VertexBuffer};
+use glium::Surface;
 
-use imgui::{Context, Ui};
-use imgui_glium_renderer::Renderer;
-use imgui_winit_support::{HiDpiMode, WinitPlatform};
 
 #[path = "entity/player/player.rs"]
 mod player;
 use player::Player;
 
-#[path = "core/WindowHandler.rs"]
-mod WindowHandler;
+#[path = "core/window_handler.rs"]
+mod window_handler;
 
-#[path = "core/EnvironmentLogic.rs"]
-mod EnvironmentLogic;
+#[path = "core/environment_logic.rs"]
+mod environment_logic;
 
 fn round_to_two_decimal_places(value: f32) -> f32 {
     (value).round()
 }
 
 fn main() {
-    let env = EnvironmentLogic::EnvironmentLogic::create(20, 0, 5f32);
+    let env = environment_logic::EnvironmentLogic::create(20, 0, 5f32);
 
-    let mut map = env.get_env();
-    let mut map_bk = map.clone();
+    let map = env.get_env();
 
-    let mut hide = false;
-
-    let winhan = WindowHandler::WindowHandler::init("test");
+    let winhan = window_handler::WindowHandler::init("test");
     let (event_loop, _window, _display) = winhan.create_window();
 
     let (mut winit_platform, mut imgui_context) = winhan.imgui_init(&_window);
@@ -54,10 +41,10 @@ fn main() {
     let (vertex_buffer, indices, program, texture) = player::Player::init(&_display).load_entity();
 
     #[derive(Clone, Copy)]
-    struct vertex {
+    struct Vertex {
         position: [f32; 2],
     }
-    implement_vertex!(vertex, position);
+    implement_vertex!(Vertex, position);
 
     let mut _window_size: (u32, u32) = (400, 400);
 
@@ -83,7 +70,7 @@ fn main() {
         winit_platform.handle_event(imgui_context.io_mut(), &_window, &event);
 
         match event {
-            glium::winit::event::Event::WindowEvent { window_id, event } => match event {
+            glium::winit::event::Event::WindowEvent { window_id: _, event } => match event {
                 glium::winit::event::WindowEvent::CloseRequested => window_target.exit(),
 
                 glium::winit::event::WindowEvent::Resized(new_size) => {
@@ -117,21 +104,21 @@ fn main() {
                  "#;
 
                     let shape2 = vec![
-                        vertex {
-                            position: [env.get_tileSize(), env.get_tileSize()],
+                        Vertex {
+                            position: [env.get_tile_size(), env.get_tile_size()],
                         },
-                        vertex {
-                            position: [-env.get_tileSize(), env.get_tileSize()],
+                        Vertex {
+                            position: [-env.get_tile_size(), env.get_tile_size()],
                         },
-                        vertex {
-                            position: [-env.get_tileSize(), -env.get_tileSize()],
+                        Vertex {
+                            position: [-env.get_tile_size(), -env.get_tile_size()],
                         },
-                        vertex {
-                            position: [env.get_tileSize(), -env.get_tileSize()],
+                        Vertex {
+                            position: [env.get_tile_size(), -env.get_tile_size()],
                         },
                     ];
 
-                    let vertex_buffer2: VertexBuffer<vertex> =
+                    let vertex_buffer2: VertexBuffer<Vertex> =
                         glium::VertexBuffer::new(&_display, &shape2).unwrap();
                     let indices2 =
                         glium::index::NoIndices(glium::index::PrimitiveType::TriangleFan);
@@ -185,10 +172,10 @@ fn main() {
                                  [(1.0 / qx*2.0), 0.0, 0.0, 0.0],
                                  [0.0, (1.0 / qy*2.0), 0.0, 0.0],
                                  [0.0, 0.0, 1.0, 0.0],
-                                 [ (keyi as i32 - env.get_mapSize() as i32 /2 )
-                                     as f32 * (env.get_tileSize() / qx*4.0 )
-                                , ( keyj as i32 - env.get_mapSize() as i32 /2)
-                                                         as f32 * (env.get_tileSize() / qy*4.0)
+                                 [ (keyi as i32 - env.get_map_size() as i32 /2 )
+                                     as f32 * (env.get_tile_size() / qx*4.0 )
+                                , ( keyj as i32 - env.get_map_size() as i32 /2)
+                                                         as f32 * (env.get_tile_size() / qy*4.0)
                                 , 0.0, 1.0f32],
                                  ] ,
                          c:(*j).abs()}, &Default::default()).unwrap();
@@ -232,8 +219,8 @@ fn main() {
                     }
                 }
                 glium::winit::event::WindowEvent::CursorMoved { position, .. } => {
-                    mouse_x = (position.x as f32);
-                    mouse_y = -(position.y as f32);
+                    mouse_x = position.x as f32;
+                    mouse_y = -position.y as f32;
                 }
                 _ => (),
             },
