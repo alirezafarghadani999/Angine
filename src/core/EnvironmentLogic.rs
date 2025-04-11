@@ -4,14 +4,14 @@ use rand::{self, rngs::StdRng, Rng, SeedableRng};
 
 const mapSize: usize = 30;
 
-pub struct EnvirementLogic {
+pub struct EnvironmentLogic {
     seed: u64,
     gameMod: i8,
     mapBox: [[f32; mapSize]; mapSize],
     tileSize: f32,
 }
 
-impl EnvirementLogic {
+impl EnvironmentLogic {
     pub fn create(seed: u64, gameMod: i8, tileSize: f32) -> Self {
         let mut env = Self {
             seed,

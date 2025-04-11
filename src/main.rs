@@ -21,15 +21,15 @@ use player::Player;
 #[path = "core/WindowHandler.rs"]
 mod WindowHandler;
 
-#[path = "core/EnvirementLogic.rs"]
-mod EnvirementLogic;
+#[path = "core/EnvironmentLogic.rs"]
+mod EnvironmentLogic;
 
 fn round_to_two_decimal_places(value: f32) -> f32 {
     (value).round()
 }
 
 fn main() {
-    let env = EnvirementLogic::EnvirementLogic::create(20, 0, 5f32);
+    let env = EnvironmentLogic::EnvironmentLogic::create(20, 0, 5f32);
 
     let mut map = env.get_env();
     let mut map_bk = map.clone();
