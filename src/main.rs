@@ -14,12 +14,17 @@ mod window_handler;
 #[path = "core/environment_logic.rs"]
 mod environment_logic;
 
+
+#[path = "core/camera_handler.rs"]
+mod camera_handler;
+
 fn round_to_two_decimal_places(value: f32) -> f32 {
     (value).round()
 }
 
 fn main() {
     let env = environment_logic::EnvironmentLogic::create(20, 0, 5f32);
+    let camera = camera_handler::CameraHandler::create();
 
     let map = env.get_env();
 
