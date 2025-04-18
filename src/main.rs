@@ -24,56 +24,56 @@ fn round_to_two_decimal_places(value: f32) -> f32 {
 
 fn main() {
     let env = environment_logic::EnvironmentLogic::create(20, 0, 5f32);
-    let camera = camera_handler::CameraHandler::create();
-
+    let mut camera = camera_handler::CameraHandler::create();
+    
     let map = env.get_env();
-
+    
     let winhan = window_handler::WindowHandler::init("test");
     let (event_loop, _window, _display) = winhan.create_window();
-
+    
     let (mut winit_platform, mut imgui_context) = winhan.imgui_init(&_window);
-
+    
     // Create renderer from this crate
     let mut renderer = imgui_glium_renderer::Renderer::new(&mut imgui_context, &_display)
-        .expect("Failed to initialize renderer");
+    .expect("Failed to initialize renderer");
 
-    // Timer for FPS calculation
-    let mut last_frame = std::time::Instant::now();
+// Timer for FPS calculation
+let mut last_frame = std::time::Instant::now();
 
-    let mut player = Player::init(&_display);
-    player.load_entity();
+let mut player = Player::init(&_display);
+player.load_entity();
 
-    let (vertex_buffer, indices, program, texture) = player::Player::init(&_display).load_entity();
+let (vertex_buffer, indices, program, texture) = player::Player::init(&_display).load_entity();
 
-    #[derive(Clone, Copy)]
-    struct Vertex {
-        position: [f32; 2],
-    }
-    implement_vertex!(Vertex, position);
+#[derive(Clone, Copy)]
+struct Vertex {
+    position: [f32; 2],
+}
+implement_vertex!(Vertex, position);
 
-    let mut _window_size: (u32, u32) = (400, 400);
+let mut _window_size: (u32, u32) = (400, 400);
 
-    let mut mouse_x = 0f32;
-    let mut mouse_y = 0f32;
+let mut mouse_x = 0f32;
+let mut mouse_y = 0f32;
 
     let mut target_x = 0f32;
     let mut target_y = 0f32;
-
+    
     let mut x = 0f32;
     let mut y = 0f32;
-
+    
     let mut qx: f32 = 0.0;
     let mut qy: f32 = 0.0;
-
+    
     let mut can_move = false;
     let mut in_ui = false;
     let step_size = 2f32;
-
+    
     // event loop
     #[allow(deprecated)]
     let _ = event_loop.run(move |event, window_target| {
         winit_platform.handle_event(imgui_context.io_mut(), &_window, &event);
-
+        
         match event {
             glium::winit::event::Event::WindowEvent { window_id: _, event } => match event {
                 glium::winit::event::WindowEvent::CloseRequested => window_target.exit(),
@@ -159,6 +159,7 @@ fn main() {
                     qx = _window_size.0 as f32 / 2.0;
                     qy = _window_size.1 as f32 / 2.0;
 
+                    camera.set_realation(qx, qy);
                     let ui = imgui_context.frame();
                     in_ui =
                         ui.is_window_focused() || ui.is_any_item_focused() || ui.is_item_hovered();
@@ -169,24 +170,29 @@ fn main() {
                     let mut target = _display.draw();
 
                     target.clear_color(0f32, 0f32, 0f32, 1.0);
-
+                    camera.set_camera_coordinate(x, y);
                     for (keyi, i) in map.iter().enumerate() {
                         for (keyj, j) in i.iter().enumerate() {
+
+                            let coordinate = camera.find_real_coordinate(
+                                (keyi as i32 - env.get_map_size() as i32 /2 )
+                                 as f32 * (env.get_tile_size())*4f32,
+                                 ( keyj as i32 - env.get_map_size() as i32 /2)
+                                 as f32 * (env.get_tile_size())*4f32
+                             );
+
                             target.draw(&vertex_buffer2, &indices2, &program2, &uniform! {
                                  matrix: [
                                  [(1.0 / qx*2.0), 0.0, 0.0, 0.0],
                                  [0.0, (1.0 / qy*2.0), 0.0, 0.0],
                                  [0.0, 0.0, 1.0, 0.0],
-                                 [ (keyi as i32 - env.get_map_size() as i32 /2 )
-                                     as f32 * (env.get_tile_size() / qx*4.0 )
-                                , ( keyj as i32 - env.get_map_size() as i32 /2)
-                                                         as f32 * (env.get_tile_size() / qy*4.0)
-                                , 0.0, 1.0f32],
+                                 [ coordinate[0],coordinate[1] , 0.0, 1.0f32],
                                  ] ,
                          c:(*j).abs()}, &Default::default()).unwrap();
                         }
                     }
 
+                    let player_pos = camera.find_real_coordinate(x, y);
                     target
                         .draw(
                             &vertex_buffer,
@@ -197,7 +203,7 @@ fn main() {
                             [(1.0 / qx*2.0), 0.0, 0.0, 0.0],
                             [0.0, (1.0 / qy*2.0), 0.0, 0.0],
                             [0.0, 0.0, 1.0, 0.0],
-                            [ (x)/ qx , (y) / qy , 0.0, 1.0f32],
+                            [ player_pos[0] , player_pos[1] , 0.0, 1.0f32],
                             ] , tex: &texture},
                             &glium::DrawParameters {
                                 blend: Blend::alpha_blending(),
@@ -218,8 +224,8 @@ fn main() {
                     if button == MouseButton::Left && state == ElementState::Pressed {
                         if !in_ui {
                             can_move = true;
-                            target_x = round_to_two_decimal_places(mouse_x - qx);
-                            target_y = round_to_two_decimal_places(mouse_y + qy);
+                            target_x = round_to_two_decimal_places(mouse_x - qx + camera.get_camera_coordinate()[0] );
+                            target_y = round_to_two_decimal_places(mouse_y + qy + camera.get_camera_coordinate()[1] );
                         }
                     }
                 }
