@@ -31,18 +31,34 @@ impl EnvironmentLogic {
 
         self.map_box = std::array::from_fn(|_| {
             std::array::from_fn(|_| {
-                (rng.random_range(0.1..1.0) as f32 * 100 as f32).round() / 100 as f32
+                (rng.random_range(0.5..1.0) as f32 * 100 as f32).round() / 100 as f32
             })
         });
 
-        for (rows_key, rows) in self.map_box.iter_mut().enumerate() 
-        {
-            for (columns_key, column) in rows.iter_mut().enumerate()
-            {
-                dbg!(columns_key, column);
+        let mut old_map = self.map_box.clone();
+
+        for (rows_key, rows) in self.map_box.iter_mut().enumerate() {
+            for (columns_key, _column) in rows.iter_mut().enumerate() {
+                if rows_key % 2 == 0 || columns_key % 2 == 0 {
+                    if rows_key >= 1 && rows_key + 1 <= old_map.len()
+                        && columns_key >= 1 && columns_key + 1 <= old_map[0].len()
+                    {
+                        let slice_c = &old_map[rows_key][columns_key-1..columns_key+1];
+                        let slice_r: Vec<f32> = old_map[rows_key-1..rows_key+1]
+                            .iter()
+                            .map(|row| row[columns_key])
+                            .collect();
+
+                        let avg_c: f32 = slice_c.iter().copied().sum::<f32>() / slice_c.len() as f32;
+                        let avg_r: f32 = slice_r.iter().copied().sum::<f32>() / slice_r.len() as f32;
+
+                        old_map[rows_key][columns_key] = (avg_c + avg_r) /2f32;
+                    }
+                }
             }
         }
 
+        self.map_box = old_map;
     }
 
     pub fn get_env(&self) -> [[f32; MAP_SIZE]; MAP_SIZE] {
